@@ -1,9 +1,9 @@
 import React, {Component} from 'react';
 import * as firebase from 'firebase';
-
 import LoginScreen from './LoginScreen';
 import ArticleListScreen from './ArticleListScreen';
 import AccountScreen from './AccountScreen';
+import ArticleScreen from './ArticleScreen';
 
 export default class BBS extends Component {
   state = {
@@ -86,27 +86,47 @@ export default class BBS extends Component {
         articles
       });
     }
+  } 
+  viewArticle = async articleId => {
+    const [articleSnapshot, contentSnapshot] = await Promise.all([
+      firebase.database().ref(`articles/${articleId}`).once('value'),
+      firebase.database().ref(`contents/${articleId}`).once('value')
+    ]);
+    const article = articleSnapshot.val();
+    const content = contentSnapshot.val();
+    this.setState({
+      currentArticle: {
+        ...article,
+        content
+      },
+      page: 'article'
+    })
   }
   render() {
-    const {nickName, uid, articles} = this.state;
-    return (
-      <div>
-        {
-          this.state.page === 'login'
-          ? <LoginScreen />
-          : this.state.page === 'list'
-          ? <ArticleListScreen 
-              onNickNameClick={this.pageToAccount} 
-              nickName={nickName || uid} 
-              articleArr = {articles} />
-          : this.state.page === 'account'
-          ? <AccountScreen 
-              onNickNameClick={this.pageToAccount} 
-              nickName={nickName || uid}
-              onNickNameSubmit={this.saveNickName} />
-          : null
-        }
-      </div>
-    )
+    const {nickName, uid, articles, currentArticle} = this.state;
+    return <div>
+        {this.state.page === "login" ? (
+          <LoginScreen />
+        ) : this.state.page === "list" ? (
+          <ArticleListScreen
+            onNickNameClick={this.pageToAccount}
+            onArticleClick={this.viewArticle}
+            nickName={nickName || uid}
+            articleArr={articles}
+          />
+        ) : this.state.page === "account" ? (
+          <AccountScreen
+            onNickNameClick={this.pageToAccount}
+            nickName={nickName || uid}
+            onNickNameSubmit={this.saveNickName}
+          />
+        ) : this.state.page === "article" ? (
+          <ArticleScreen 
+            {...currentArticle} 
+            nickName={nickName || uid}
+            onNickNameClick={this.pageToAccount}
+          />
+        ) : null}
+      </div>;
   }
 }
