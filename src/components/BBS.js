@@ -1,58 +1,66 @@
-import React, {Component} from 'react'; // Library
+import React, {Component} from 'react';
 import * as firebase from 'firebase';
-import LoginScreen from './LoginScreen'; // ./ -> Component
+
+import LoginScreen from './LoginScreen';
 import ArticleListScreen from './ArticleListScreen';
+import AccountScreen from './AccountScreen';
 
 export default class BBS extends Component {
-    state = {
-        page: 'login'
-    }
-
-    componentDidMount(){
-        // Initialize Firebase
-        var config = {
-            apiKey: "AIzaSyC18ADhYDhnHLrMa9-Jo3SjX3URN3lop8Y",
-            authDomain: "fds-firebase-storage-22421.firebaseapp.com",
-            databaseURL: "https://fds-firebase-storage-22421.firebaseio.com",
-            projectId: "fds-firebase-storage-22421",
-            storageBucket: "fds-firebase-storage-22421.appspot.com",
-            messagingSenderId: "1032919680563"
-        };
-        firebase.initializeApp(config);
-        firebase.auth().onAuthStateChanged(user => { //funtion(){} -> 화살표함수 = this전역객체 -> 자신이 속한객체
-          if (user) {
-            this.setState({
-                page: 'list'
-            });
-        } else {
-            this.setState({
-                page: 'login'
-            });
-          }
+  state = {
+    page: 'login'
+  }
+  pageToAccount = () => {
+    this.setState({
+      page: 'account'
+    });
+  }
+  componentDidMount() {
+    const config = {
+      apiKey: "AIzaSyC5bvpoKyfa3qwTxhSt0PxgQZI2dI3QbZc",
+      authDomain: "fds-cra.firebaseapp.com",
+      databaseURL: "https://fds-cra.firebaseio.com",
+      projectId: "fds-cra",
+      storageBucket: "fds-cra.appspot.com",
+      messagingSenderId: "966283711333"
+    };
+    firebase.initializeApp(config);
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        this.setState({
+          page: 'list',
+          uid: user.uid
         });
-    }
-
-    handleLogInClick = () => {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        firebase.auth().signInWithPopup(provider);
-    }
-
-    handleLogOutClick = () => {
-        firebase.auth().signOut();
-    }
-
-    render(){
-        return (
-            <div>
-                {
-                    this.state.page === 'login'
-                        ? <LoginScreen onLogInClick={this.handleLogInClick}/>
-                        : this.state.page === 'list'
-                        ? <ArticleListScreen onLogOutClick={this.handleLogOutClick}/>
-                        : null
-                }
-           
-            </div>    
-        )
-    }
+      } else {
+        this.setState({
+          page: 'login'
+        });
+      }
+    });
+  }
+  saveNickName = async nickName => {
+    const {uid} = this.state;
+    await firebase.database().ref(`users/${uid}/nickName`).set(nickName)
+    this.setState({
+      nickName,
+      page: 'list'
+    });
+  }
+  render() {
+    return (
+      <div>
+        {
+          this.state.page === 'login'
+          ? <LoginScreen />
+          : this.state.page === 'list'
+          ? <ArticleListScreen onNickNameClick={this.pageToAccount} nickName={this.state.nickName ? this.state.nickName : this.state.uid} />
+          : this.state.page === 'account'
+          ? <AccountScreen 
+              onNickNameClick={this.pageToAccount} 
+              nickName={this.state.nickName ? this.state.nickName : this.state.uid}
+              onNickNameSubmit={this.saveNickName} />
+          : null
+        }
+      </div>
+    )
+  }
 }
