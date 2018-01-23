@@ -12,9 +12,9 @@ export default class ArticleScreen extends Component{
         
         return(
             <div>
-            <NavBar nickName={nickName} onNickNameClick={onNickNameClick} />
-                {title}
-                {content}
+                <NavBar nickName={nickName} onNickNameClick={onNickNameClick} />
+                <div>title: {title}</div>
+                <div>content: {content}</div>
             </div>
         )
     }

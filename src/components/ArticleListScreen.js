@@ -28,6 +28,10 @@ const ArticleItemRow = styled(Table.Row)`
 `
 
 export default class ArticleListScreen extends Component {
+  handleNewArticleClick = e => {
+    this.props.onNewArticleClick();
+  }
+  
   render() {
     const {
       nickName, 
@@ -38,6 +42,7 @@ export default class ArticleListScreen extends Component {
 
     return <div>
         <NavBar nickName={nickName} onNickNameClick={onNickNameClick} />
+        <button onClick={this.handleNewArticleClick}>글쓰기</button>
         <Table>
           <Table.Header>
             <ArticleItemRow>
